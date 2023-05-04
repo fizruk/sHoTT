@@ -1,16 +1,28 @@
-#lang rzk-1
+# 4. Equivalences 
 
+This is a literate `rzk` file:
+
+```rzk
+#lang rzk-1
+```
+
+## Sections and retractions
+```rzk
 #def hasSection 
     (A B : U)
     (f : A -> B) 
     : U
     := ∑ (s : B -> A), homotopy B B (composition B A B f s)(identity B)
   
-#def hasRetraction    (A B : U)
+#def hasRetraction
+    (A B : U)
     (f : A -> B) 
     : U
     := ∑ (r : B -> A), homotopy A A (composition A B A r f)(identity A)
-  
+```
+
+## Equivalences
+```rzk
 -- equivalences are bi-invertible maps
 #def isEquiv     
     (A B : U)
@@ -54,7 +66,11 @@
                 (identity B) 
                 (second (second fisequiv)) 
                 (isEquiv-retraction A B f fisequiv))
+```
 
+## Invertible maps
+
+```rzk
 -- the following type of more coherent equivalences is not a proposition
 #def hasInverse 
     (A B : U)
@@ -71,7 +87,11 @@
     (fhasinverse : hasInverse A B f)
     : B -> A
     := first (fhasinverse)
+```    
 
+## Equivalences are invertible maps
+
+```rzk
 -- invertible maps are equivalences
 #def hasInverse-isEquiv
     (A B : U)
@@ -98,7 +118,11 @@
                         f) 
                     (second (first fisequiv)) ,
             second (second  fisequiv)))
+```
 
+## Half adjoint equivalences
+
+```rzk
 -- Some iterated composites associated to a pair of invertible maps.
 #def hasInverse-retraction-composite 
     (A B : U)
@@ -343,7 +367,11 @@
     (fisequiv : isEquiv A B f)
     : isHalfAdjointEquiv A B f
     := hasInverse-isHalfAdjointEquiv A B f (isEquiv-hasInverse A B f fisequiv)
+```
 
+## Composing equivalences
+
+```rzk
 -- The type of equivalences between types uses the propositional notion isEquiv rather than the incoherent hasInverse.
 #def Eq (A B : U) : U
   :=  ∑ (f : A -> B), ((isEquiv A) B) f
@@ -443,13 +471,49 @@
     (hisequiv : isEquiv C D h)
     : isEquiv A D (triple-composition A B C D h g f)    
     := compose_isEquiv A B D f fisequiv (composition B C D h g) (compose_isEquiv B C D g gisequiv h hisequiv)
+```
 
--- the next result requires function extensionality
+## Functions between contractible types
+
+A function between contractible types is an equivalence
+
+```rzk
+#def areContr-isEquiv
+    (A B : U)
+    (Aiscontr : isContr A)
+    (Biscontr : isContr B)
+    (f : A -> B)
+    : isEquiv A B f
+    := ((\b -> contraction-center A Aiscontr, 
+        \a -> contracting-htpy A Aiscontr a),
+       (\b -> contraction-center A Aiscontr, 
+        \b -> contractible-connecting-htpy B Biscontr (f (contraction-center A Aiscontr)) b))
+```
+
+A type equivalent to a contractible type is contractible.
+
+```rzk
+#def isEquiv-toContr-isContr
+    (A B : U)
+    (e : Eq A B)
+    (Biscontr : isContr B)
+    : isContr A
+    := isRetract-ofContr-isContr A B 
+        (first e, first (second e))
+        Biscontr
+```   
+
+
+
+## Function extensionality
+
+```rzk
+-- The type that encodes the function extensionality axiom.
 #def FunExt : U
     := (X : U) -> (A : X -> U) -> (f : (x : X) -> A x) -> (g : (x : X) -> A x) ->
         (px : (x : X) -> f x = g x) -> f = g
 
--- A fiberwise equivalence defines an equivalence of dependent function types
+-- Using function extensionality, a fiberwise equivalence defines an equivalence of dependent function types
 #def fibered-equiv-function-equiv
     (funext : FunExt)
     (X : U)
@@ -461,80 +525,5 @@
                 \a -> funext X A (\x -> (first (first (second (fibequiv x)))) ((first (fibequiv x)) (a x))) a (\x -> (second (first (second (fibequiv x)))) (a x))), 
            ((\b -> \x -> (first (second (second (fibequiv x)))) (b x)),
             (\b -> funext X B (\x -> (first (fibequiv x)) ((first (second (second (fibequiv x)))) (b x))) b (\x -> (second (second (second (fibequiv x)))) (b x))))))
-
--- Setting up identity types of sigma types
-
--- Sigma-induction
-#def ind-Sigma
-        (A : U)
-        (B : A -> U)
-        (C : (∑(a : A), B a) -> U)
-        (s : ∑(a : A), B a)
-        (f : (a : A) -> (b : B a) -> C (a, b))
-        : C s
-        := (f (first s)) (second s)
-
--- [Rijke 22, Definition 9.3.1]
-#def Eq-Sigma
-    (A : U)
-    (B : A -> U)
-    (s t : ∑(a : A), B a)
-    : U
-    := ∑(p : (first s) = (first t)), (transport A B (first s) (first t) p (second s)) = (second t)
-
--- [Rijke 22, used in Lemma 9.3.2]
-#def refl-in-Sigma
-    (A : U)
-    (B : A -> U)
-    (x : A)
-    (y : B x)
-    : ∑(p : (x = x)), ((transport A B x x refl_{x} y) = y)
-    := (refl_{x}, refl_{y})
-
--- [Rijke 22, Lemma 9.3.2]
--- Eq-sigma is reflexive
-#def reflexive-Eq-Sigma
-       (A : U)
-       (B : A -> U)
-       (s : ∑(a : A), B a)
-       : (Eq-Sigma A B s s)
-       := (ind-Sigma 
-      A
-      B
-     (\k -> (Eq-Sigma A B k k))
-      s
-     (\u v -> (refl_{u}, refl_{v}))
-      )
-
--- [Rijke 22, Definition 9.3.3]
-#def pair-eq
-    (A : U)
-    (B : A -> U)
-    (s t : ∑(a : A), B a)
-    (p : s = t)
-    : (Eq-Sigma A B s t)
-    := idJ(∑(a : A), B a, s, \t' p' -> (Eq-Sigma A B s t'), (reflexive-Eq-Sigma A B s), t, p)
-
--- [Rijke 22, Theorem 9.3.3, Characterization of identity types of sigma types]
--- #def eq-pair
---     (A : U)
---     (B : A -> U)
---     (s t : ∑(a : A), B a)
---     TODO 
--- #def eq-sigma
---     (A : U)
---     (B : A -> U)
---     (s t : ∑(a : A), B a)
---     (p : (s = t))
---     : (Eq-Sigma A B s t)
---     := TODO
-
--- -- Split off homotopy in a sigma type
--- #def sigma-htopy-split
---     (A : U)
---     (B : A -> U)
---     (k m : (∑(a : A), B a))
---     (p : (k = m))
---     : (∑(q : (first k) = (first m)), 
---          )
+```
 

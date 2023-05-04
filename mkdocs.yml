@@ -5,12 +5,14 @@ nav:
     - About: index.md
 
   - HoTT:
-      - Common: hott/0-common.rzk
-      - Paths: hott/1-paths.rzk
-      - Contractible: hott/2-contractible.rzk
-      - Homotopies: hott/3-homotopies.rzk
-      - Equivalences: hott/4-equivalences.rzk
-      - Total Spaces: hott/5-total-space.rzk
+      - Common: hott/0-common.md
+      - Paths: hott/1-paths.md
+      - Homotopies: hott/2-homotopies.md      
+      - Contractible: hott/3-contractible.md
+      - Equivalences: hott/4-equivalences.md
+      - Sigma types: hott/5-sigma.md
+      - Trivial fibrations: hott/6-trivial-fibrations.md
+      - Fibers: hott/7-fibers.md
 
   - Simplicial HoTT:
       - Simplicial Type Theory: simplicial-hott/03-simplicial-type-theory.md
